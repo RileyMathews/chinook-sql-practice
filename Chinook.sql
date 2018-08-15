@@ -73,31 +73,99 @@ LEFT JOIN Album ON Track.AlbumId=Album.AlbumId
 LEFT JOIN Artist ON Album.ArtistId=Artist.ArtistId
 
 -- country_invoices.sql: Provide a query that shows the # of invoices per country. HINT: GROUP BY
+SELECT Count(Customer.Country), Customer.Country
+FROM Customer, Invoice
+WHERE Invoice.CustomerId=Customer.CustomerId
+GROUP BY Customer.Country
 
 -- playlists_track_count.sql: Provide a query that shows the total number of tracks in each playlist. The Playlist name should be include on the resulant table.
+SELECT Count(PlaylistTrack.TrackId), Playlist.Name
+FROM Playlist, PlaylistTrack
+WHERE PlaylistTrack.PlaylistId=Playlist.PlaylistId
+GROUP BY Playlist.PlaylistId
 
 -- tracks_no_id.sql: Provide a query that shows all the Tracks, but displays no IDs. The result should include the Album name, Media type and Genre.
+SELECT Track.Name, Genre.Name, Album.Title, MediaType.Name
+FROM Track, Genre, Album, MediaType
+WHERE Track.GenreId=Genre.GenreId
+AND Track.AlbumId=Album.AlbumId
+AND Track.MediaTypeId=MediaType.MediaTypeId
 
 -- invoices_line_item_count.sql: Provide a query that shows all Invoices but includes the # of invoice line items.
+SELECT Count(InvoiceLine.InvoiceLineId), Invoice.InvoiceId
+FROM InvoiceLine, Invoice
+WHERE InvoiceLine.InvoiceId=Invoice.InvoiceId
+GROUP BY Invoice.InvoiceId
 
 -- sales_agent_total_sales.sql: Provide a query that shows total sales made by each sales agent.
+SELECT Count(Invoice.Total), Employee.FirstName
+FROM Invoice, Customer, Employee
+WHERE Invoice.CustomerId=Customer.CustomerId
+AND Customer.SupportRepId=Employee.EmployeeId
+GROUP BY Employee.EmployeeId
 
 -- top_2009_agent.sql: Which sales agent made the most in sales in 2009?
+SELECT Max(Invoice.Total), Employee.FirstName
+FROM Invoice, Customer, Employee
+WHERE Invoice.CustomerId=Customer.CustomerId
+AND Customer.SupportRepId=Employee.EmployeeId
+AND Invoice.InvoiceDate LIKE "2009%"
 
 -- Hint: Use the MAX function on a subquery.
 
 -- top_agent.sql: Which sales agent made the most in sales over all?
+SELECT Max(Invoice.Total), Employee.FirstName
+FROM Invoice, Customer, Employee
+WHERE Invoice.CustomerId=Customer.CustomerId
+AND Customer.SupportRepId=Employee.EmployeeId
+
 
 -- sales_agent_customer_count.sql: Provide a query that shows the count of customers assigned to each sales agent.
+SELECT Count(Customer.CustomerId), Employee.FirstName
+FROM Customer, Employee
+WHERE Customer.SupportRepId=Employee.EmployeeId
+GROUP BY Employee.EmployeeId
 
 -- sales_per_country.sql: Provide a query that shows the total sales per country.
+SELECT Count(Invoice.InvoiceId), Customer.Country
+FROM Invoice, Customer
+WHERE Invoice.CustomerId=Customer.CustomerId
+GROUP BY Customer.Country
 
 -- top_country.sql: Which country's customers spent the most?
+SELECT Max(Invoice.Total), Customer.Country
+FROM Invoice, Customer
+WHERE Invoice.CustomerId=Customer.CustomerId
 
 -- top_2013_track.sql: Provide a query that shows the most purchased track of 2013.
+SELECT Max(InvoiceLine.TrackId), Track.Name, Count(InvoiceLine.TrackId)
+FROM InvoiceLine, Track
+WHERE InvoiceLine.TrackId=Track.TrackId
 
 -- top_5_tracks.sql: Provide a query that shows the top 5 most purchased tracks over all.
+SELECT Count(InvoiceLine.TrackId) as trackcount, Track.Name
+FROM InvoiceLine, Track
+WHERE InvoiceLine.TrackId=Track.TrackId
+Group BY Track.Name
+ORDER BY trackcount DESC
+LIMIT 5
 
 -- top_3_artists.sql: Provide a query that shows the top 3 best selling artists.
+SELECT count(Track.TrackId), Artist.Name
+FROM InvoiceLine
+JOIN Invoice on InvoiceLine.InvoiceId=Invoice.InvoiceId
+JOIN Track ON Track.TrackId=InvoiceLine.TrackId
+JOIN Album ON Track.AlbumId=Album.AlbumId
+JOIN Artist ON Artist.ArtistId=Album.ArtistId
+Group BY Artist.Name
+ORDER BY Track.TrackID DESC
+LIMIT 3
 
 -- top_media_type.sql: Provide a query that shows the most purchased Media Type.
+SELECT Count(MediaType.MediaTypeId) as mediacount, MediaType.Name
+FROM MediaType
+LEFT JOIN Track ON Track.MediaTypeId=MediaType.MediaTypeId
+LEFT JOIN InvoiceLine ON InvoiceLine.TrackId=MediaType.MediaTypeId
+GROUP BY MediaType.MediaTypeId
+ORDER BY mediacount desc
+LIMIT 1
